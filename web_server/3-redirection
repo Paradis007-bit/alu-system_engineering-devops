@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
-# Installs Nginx if not installed, preparing for redirect configuration
+# Installs Nginx and configures /redirect_me to redirect permanently to a target URL
 
 sudo apt-get update -y
 sudo apt-get install -y nginx
+
+# Ensure default site exists
+sudo mkdir -p /var/www/html
+
+# Add 301 redirect for /redirect_me
+sudo tee /etc/nginx/sites-available/default > /dev/null <<'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+}
+EOF
+
+# Reload Nginx without systemctl
+sudo nginx -s reload
