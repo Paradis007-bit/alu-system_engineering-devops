@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Installs nginx and configures the default page for Holberton School
+
+# Update packages and install nginx
+sudo apt-get update -y
+sudo apt-get install -y nginx
+
+# Start nginx without using systemctl
+sudo service nginx start
+
+# Replace default index.html with required content
+echo "Holberton School" | sudo tee /var/www/html/index.html
