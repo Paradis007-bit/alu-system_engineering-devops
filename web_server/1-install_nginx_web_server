@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Installs and configures Nginx web server
-apt-get update -y
-apt-get install -y nginx
-mkdir -p /var/www/html
-echo "Holberton School" > /var/www/html/index.html
-service nginx start
-nginx -s reload
+# Configures a new Ubuntu machine with Nginx and a page containing Holberton School
+
+sudo apt-get update -y
+sudo apt-get install -y nginx
+echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
+sudo service nginx restart
