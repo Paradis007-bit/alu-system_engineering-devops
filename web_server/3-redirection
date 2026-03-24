@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
-# Configure Nginx to redirect /redirect_me to a YouTube video (301 Moved Permanently)
+# Configures nginx with a 301 redirect on /redirect_me
 
-# Exit immediately if a command fails
-set -e
+apt-get update -y
+apt-get install -y nginx
+echo "Holberton School" > /var/www/html/index.html
 
-# Update package index and install Nginx if not installed
-sudo apt-get update -y
-sudo apt-get install -y nginx
+cat > /etc/nginx/sites-available/default << 'EOF'
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server ipv6only=on;
 
-# Backup default Nginx config if not already backed up
-if [ ! -f /etc/nginx/sites-available/default.bak ]; then
-    sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-fi
+	root /var/www/html;
+	index index.html index.htm;
 
-# Add a 301 redirect for /redirect_me if not already present
-if ! grep -q "location /redirect_me" /etc/nginx/sites-available/default; then
-    sudo sed -i "/server_name _;/a \    location /redirect_me {\n        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n    }" /etc/nginx/sites-available/default
-fi
+	server_name _;
 
-# Test Nginx configuration
-sudo nginx -t
+	location /redirect_me {
+		return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+	}
 
-# Reload Nginx to apply changes
-sudo systemctl reload nginx
+	location / {
+		try_files $uri $uri/ =404;
+	}
+}
+EOF
 
-# Exit with success
-exit 0
+service nginx restart
