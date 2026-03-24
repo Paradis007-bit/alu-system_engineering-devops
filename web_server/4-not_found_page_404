@@ -1,31 +1,21 @@
 #!/usr/bin/env bash
-# Configures nginx with a custom 404 page
+# Configure Nginx to serve a custom 404 page with "Ceci n'est pas une page"
 
-apt-get update -y
-apt-get install -y nginx
-echo "Holberton School" > /var/www/html/index.html
-echo "Ceci n'est pas une page" > /var/www/html/404.html
+# Install Nginx if not installed
+sudo apt-get update -y
+sudo apt-get install -y nginx
 
-cat > /etc/nginx/sites-available/default << 'EOF'
-server {
-	listen 80 default_server;
-	listen [::]:80 default_server ipv6only=on;
+# Create the custom 404 page
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html
 
-	root /var/www/html;
-	index index.html index.htm;
+# Backup default config
+sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
 
-	server_name _;
+# Configure Nginx to use the custom 404 page
+sudo sed -i '/location \/ {/a \        error_page 404 /404.html;\n        location = /404.html {\n                internal;\n        }' /etc/nginx/sites-available/default
 
-	location /redirect_me {
-		return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-	}
+# Test Nginx configuration
+sudo nginx -t
 
-	error_page 404 /404.html;
-
-	location / {
-		try_files $uri $uri/ =404;
-	}
-}
-EOF
-
-service nginx restart
+# Reload Nginx to apply changes
+sudo systemctl reload nginx
