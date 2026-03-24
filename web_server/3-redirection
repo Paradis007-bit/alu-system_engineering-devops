@@ -1,35 +1,28 @@
 #!/usr/bin/env bash
-# Configures Nginx to return a custom 404 page
+# Configure Nginx to redirect /redirect_me to a YouTube video (301 Moved Permanently)
 
+# Exit immediately if a command fails
+set -e
+
+# Update package index and install Nginx if not installed
 sudo apt-get update -y
 sudo apt-get install -y nginx
 
-# Create 404 page
-echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html
+# Backup default Nginx config if not already backed up
+if [ ! -f /etc/nginx/sites-available/default.bak ]; then
+    sudo cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+fi
 
-# Configure nginx (overwrite safely)
-sudo tee /etc/nginx/sites-available/default > /dev/null <<'EOF'
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+# Add a 301 redirect for /redirect_me if not already present
+if ! grep -q "location /redirect_me" /etc/nginx/sites-available/default; then
+    sudo sed -i "/server_name _;/a \    location /redirect_me {\n        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;\n    }" /etc/nginx/sites-available/default
+fi
 
-    root /var/www/html;
-    index index.html index.htm index.nginx-debian.html;
-
-    server_name _;
-
-    error_page 404 /404.html;
-
-    location = /404.html {
-        internal;
-    }
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
-}
-EOF
-
-# Test and reload
+# Test Nginx configuration
 sudo nginx -t
-sudo service nginx reload
+
+# Reload Nginx to apply changes
+sudo systemctl reload nginx
+
+# Exit with success
+exit 0
