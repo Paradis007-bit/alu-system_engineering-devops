@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Configures ufw to forward port 8080/TCP to port 80/TCP
+
+sudo sed -i '1s/^/*nat\n:PREROUTING ACCEPT [0:0]\n-A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80\nCOMMIT\n\n/' /etc/ufw/before.rules
+sudo ufw allow 8080/tcp
+sudo ufw disable
+sudo ufw --force enable
